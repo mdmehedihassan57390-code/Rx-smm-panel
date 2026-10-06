@@ -24,20 +24,28 @@ app.post('/api/place-order', async (req, res) => {
   }
 
   try {
-    const params = new URLSearchParams();
-    params.append('key', API_KEY);
-    params.append('action', 'add');
-    params.append('service', service);
-    params.append('link', link);
-    params.append('quantity', quantity);
+    const postData = new URLSearchParams({
+      key: API_KEY,
+      action: 'add',
+      service: service,
+      link: link,
+      quantity: quantity
+    }).toString();
 
-    const response = await axios.post(PROVIDER_API_URL, params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    const response = await axios.post(PROVIDER_API_URL, postData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
     });
 
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: 'AmarBoost API-তে প্রসেস করতে ব্যর্থ হয়েছে।' });
+    console.error('API Error Details:', error.response ? error.response.data : error.message);
+    res.status(500).json({ 
+      error: 'AmarBoost API-তে প্রসেস করতে ব্যর্থ হয়েছে।',
+      details: error.response ? error.response.data : error.message 
+    });
   }
 });
 
