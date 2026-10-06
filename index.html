@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AmarBoost - Free Order Panel</title>
+  <link rel="stylesheet" href="https://storage.perfectcdn.com/ry76oy/3y48j3l5p76m0dnm.css">
+  <link rel="stylesheet" href="https://storage.perfectcdn.com/ry76oy/98d2r3l22kbg7o6x.css">
+  <style>
+    body { background-color: #0f172a; color: #fff; }
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; color: #fff; }
+    .form-control { background-color: #0f172a; color: #fff; border: 1px solid #334155; }
+    .form-control:focus { background-color: #0f172a; color: #fff; }
+  </style>
+</head>
+<body class="body">
+  <div class="wrapper-content">
+    <div class="container my-5">
+      <div class="col-md-8 offset-md-2">
+        <div class="card p-4 shadow">
+          <h4 class="mb-4 text-center text-warning">Free Order Panel</h4>
+          <form id="orderForm">
+            
+            <div class="mb-3">
+              <label class="form-label">Category</label>
+              <select class="form-control" id="orderform-category">
+                <option value="tiktok_views">TikTok Views | Zero Drop</option>
+              </select>
+            </div>
 
+            <div class="mb-3">
+              <label class="form-label">Service</label>
+              <select class="form-control" id="orderform-service"></select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Link</label>
+              <input class="form-control" type="text" id="field-link" placeholder="https://vm.tiktok.com/..." required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Quantity (Min: 100)</label>
+              <input class="form-control" type="number" id="field-quantity" placeholder="1000" min="100" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Price</label>
+              <input class="form-control text-success fw-bold" type="text" id="charge" value="FREE" disabled>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-warning w-100 fw-bold">Submit Free Order</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const servicesData = {
+      "tiktok_views": [
+        { id: "6788", name: "6788 - TikTok Views | Almost Non Drop | Cancel Enable" },
+        { id: "6835", name: "6835 - TikTok Views | Instant - 30Min | 100% Non Drop" },
+        { id: "6836", name: "6836 - TikTok Views | Instant - 10Min | Good Speed" }
+      ]
+    };
+
+    const catSel = document.getElementById('orderform-category');
+    const serSel = document.getElementById('orderform-service');
+
+    function updateServices() {
+      const services = servicesData[catSel.value] || [];
+      serSel.innerHTML = '';
+      services.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        serSel.appendChild(opt);
+      });
+    }
+
+    catSel.addEventListener('change', updateServices);
+    updateServices();
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Processing Order...';
+
+      try {
+        const res = await fetch('/api/place-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service: serSel.value,
+            link: document.getElementById('field-link').value,
+            quantity: document.getElementById('field-quantity').value
+          })
+        });
+        
+        const data = await res.json();
+        if (data.order) {
+          alert(`অর্ডার সফল হয়েছে! Order ID: ${data.order}`);
+        } else if (data.error) {
+          alert(`ত্রুটি: ${data.error}`);
+        } else {
+          alert('রেসপন্স: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('সার্ভার কানেকশন এরর');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Submit Free Order';
+      }
+    });
+  </script>
+</body>
+    </html>
+  
